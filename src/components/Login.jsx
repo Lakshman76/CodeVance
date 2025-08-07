@@ -1,7 +1,36 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import toast from "react-hot-toast";
+import axiosInstance from "../config/axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 const Login = ({ onToggleAuth }) => {
+  const [loginDetails, setLoginDetails] = useState({
+    email: "",
+    password: "",
+  });
+  const navigate = useNavigate();
+
+  function handleUserInput(e) {
+    const { name, value } = e.target;
+    setLoginDetails({ ...loginDetails, [name]: value });
+  }
+
+  async function onFormSubmit(e) {
+    e.preventDefault();
+    if (!loginDetails.email || !loginDetails.password) {
+      toast.error("All fields are required");
+      return;
+    }
+    toast.promise(axiosInstance.post("/auth/login", loginDetails), {
+      loading: "Logging in...",
+      success: (data) => {
+        navigate("/dashboard");
+        return data.data;
+      },
+      error: (err) => err.response.data,
+    });
+  }
   return (
     <div className="relative bg-gray-900 bg-opacity-40 rounded-2xl shadow-2xl overflow-hidden p-8 backdrop-blur-lg border border-gray-700 border-opacity-50">
       {/* Decorative elements */}
@@ -43,7 +72,11 @@ const Login = ({ onToggleAuth }) => {
           transition={{ delay: 0.3 }}
         >
           <input
+            id="email"
+            name="email"
             type="email"
+            value={loginDetails.email}
+            onChange={handleUserInput}
             className="w-full px-4 py-3 bg-gray-800 bg-opacity-60 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             placeholder="Email Address"
           />
@@ -55,6 +88,10 @@ const Login = ({ onToggleAuth }) => {
           transition={{ delay: 0.4 }}
         >
           <input
+            id="password"
+            name="password"
+            value={loginDetails.password}
+            onChange={handleUserInput}
             type="password"
             className="w-full px-4 py-3 bg-gray-800 bg-opacity-60 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             placeholder="Password"
@@ -70,6 +107,7 @@ const Login = ({ onToggleAuth }) => {
           <button
             type="submit"
             className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50"
+            onClick={onFormSubmit}
           >
             Login
           </button>
@@ -83,7 +121,7 @@ const Login = ({ onToggleAuth }) => {
         transition={{ delay: 0.6 }}
       >
         <p className="text-sm text-gray-400">
-          Don't have an account?{' '}
+          Don't have an account?{" "}
           <button
             onClick={onToggleAuth}
             className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer"
