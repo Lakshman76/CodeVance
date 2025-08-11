@@ -3,6 +3,7 @@ import axiosInstance from "../config/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import CodeEditor from "../pages/CodeEditor";
 import { io } from "socket.io-client";
+import Chat from "../pages/Chat";
 
 const socket = io("http://localhost:5003");
 
@@ -34,8 +35,9 @@ const Dashboard = () => {
           Logout
         </button>
       </div>
-      <div>
+      <div className="flex">
         <CodeEditor socket={socket} />
+        <Chat socket={socket} />
       </div>
     </>
   );
