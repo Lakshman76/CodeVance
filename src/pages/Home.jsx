@@ -8,11 +8,19 @@ import Footer from "../components/Footer";
 function Home() {
   return (
     <>
-      <HeroSection />
-      <About />
-      <FeaturesSection />
-      <CreatorsSection/>
-      <Footer/>
+      <div id="hero">
+        <HeroSection />
+      </div>
+      <div id="about">
+        <About />
+      </div>
+      <div id="features">
+        <FeaturesSection />
+      </div>
+      <div id="creators">
+        <CreatorsSection />
+      </div>
+      <Footer />
     </>
   );
 }

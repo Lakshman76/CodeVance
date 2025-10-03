@@ -25,8 +25,6 @@ function App() {
       {!isNavbarHide && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/features" element={<Features />} />
         <Route path="/docs" element={<Documentaions />} />
         <Route path="/get-started" element={<AuthPage />} />
         <Route
