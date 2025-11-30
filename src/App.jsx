@@ -7,8 +7,6 @@ import {
 } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
-import About from "./pages/About";
-import Features from "./pages/Features";
 import AuthPage from "./pages/AuthPage";
 import Documentaions from "./pages/Documentaions";
 import Dashboard from "./components/Dashboard";
