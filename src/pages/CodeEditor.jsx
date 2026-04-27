@@ -70,6 +70,29 @@ const CodeEditor = ({ socket, roomId }) => {
       socket.off("code-change", handleCodeChange);
     };
   }, [socket, roomId]);
+  useEffect(() => {
+    socket.on("request-code", (targetSocketId) => {
+      socket.emit("send-code", {
+        targetSocketId,
+        code,
+        roomId,
+      });
+    });
+
+    return () => {
+      socket.off("request-code");
+    };
+  }, [socket, code, roomId]);
+
+  useEffect(() => {
+    socket.on("receive-code", ({ code: incomingCode }) => {
+      setCode(incomingCode);
+    });
+
+    return () => {
+      socket.off("receive-code");
+    };
+  }, [socket]);
 
   // ✅ Emit code changes
   const handleEditorChange = (value) => {
