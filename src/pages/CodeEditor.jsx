@@ -56,7 +56,7 @@ const CodeEditor = ({ socket, roomId }) => {
 
   const editorRef = useRef(null);
 
-  // ✅ Listen for incoming code changes (room-based)
+  // ✅ CODE SYNC
   useEffect(() => {
     const handleCodeChange = ({ roomId: incomingRoom, code }) => {
       if (incomingRoom !== roomId) return;
@@ -70,29 +70,41 @@ const CodeEditor = ({ socket, roomId }) => {
       socket.off("code-change", handleCodeChange);
     };
   }, [socket, roomId]);
+
+  // ✅ HANDLE REQUEST FOR CODE
   useEffect(() => {
-    socket.on("request-code", (targetSocketId) => {
+    const handleRequestCode = ({ targetSocketId }) => {
       socket.emit("send-code", {
         targetSocketId,
         code,
         roomId,
       });
-    });
+    };
+
+    socket.on("request-code", handleRequestCode);
 
     return () => {
-      socket.off("request-code");
+      socket.off("request-code", handleRequestCode);
     };
   }, [socket, code, roomId]);
 
+  // ✅ RECEIVE INITIAL CODE
   useEffect(() => {
-    socket.on("receive-code", ({ code: incomingCode }) => {
-      setCode(incomingCode);
-    });
+    const handleReceiveCode = ({
+      code: incomingCode,
+      roomId: incomingRoom,
+    }) => {
+      if (incomingRoom !== roomId) return;
+
+      setCode((prev) => (prev !== incomingCode ? incomingCode : prev));
+    };
+
+    socket.on("receive-code", handleReceiveCode);
 
     return () => {
-      socket.off("receive-code");
+      socket.off("receive-code", handleReceiveCode);
     };
-  }, [socket]);
+  }, [socket, roomId]);
 
   // ✅ Emit code changes
   const handleEditorChange = (value) => {
