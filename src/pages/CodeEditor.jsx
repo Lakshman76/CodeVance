@@ -137,15 +137,12 @@ const CodeEditor = ({ socket, roomId }) => {
 
       const langObj = languages.find((lang) => lang.name === selectedLanguage);
 
-      const response = await axiosInstance.post(
-        `${import.meta.env.VITE_API_GATEWAY}/compiler/run`,
-        {
-          source_code: encodedCode,
-          language_id: langObj.id,
-          stdin: input,
-          is_base64: true,
-        }
-      );
+      const response = await axiosInstance.post("/compiler/run", {
+        source_code: encodedCode,
+        language_id: langObj.id,
+        stdin: input,
+        is_base64: true,
+      });
 
       const data = response.data;
 
@@ -154,7 +151,7 @@ const CodeEditor = ({ socket, roomId }) => {
       else if (data?.compile_output) setOutput(data.compile_output);
       else setOutput("No output");
     } catch (err) {
-      setOutput("Error running code", err);
+      setOutput(err.response?.data?.error || err.message);
     }
   };
 

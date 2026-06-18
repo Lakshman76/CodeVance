@@ -28,7 +28,7 @@ const Login = ({ onToggleAuth }) => {
         navigate("/dashboard");
         return data.data;
       },
-      error: (err) => err.response.data,
+      error: (err) => err?.response.data,
     });
   }
   return (

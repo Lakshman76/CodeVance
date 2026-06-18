@@ -7,7 +7,7 @@ import { io } from "socket.io-client";
 import Chat from "../pages/Chat";
 
 // ✅ Single socket instance
-const socket = io("http://localhost:5003", {
+const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5003", {
   autoConnect: true,
   transports: ["websocket"],
 });
