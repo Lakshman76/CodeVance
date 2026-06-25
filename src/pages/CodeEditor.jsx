@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import axiosInstance from "../config/axiosInstance";
+import { FiChevronDown, FiPlay, FiTerminal } from "react-icons/fi";
 
 const languages = [
   {
@@ -156,65 +157,107 @@ const CodeEditor = ({ socket, roomId }) => {
   };
 
   return (
-    <div style={{ height: "60vh", width: "80vw" }}>
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden rounded-xl border border-white/10 bg-[#070b14]">
       {/* 🔹 Language Selector */}
-      <div className="p-2 bg-gray-800 text-white flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <label className="text-sm">Language:</label>
-          <select
-            className="px-2 py-1 rounded bg-gray-900 border border-gray-600"
-            value={selectedLanguage}
-            onChange={handleLanguageChange}
-          >
-            {languages.map((lang) => (
-              <option key={lang.name} value={lang.name}>
-                {lang.name}
-              </option>
-            ))}
-          </select>
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-white/[0.04] px-3 py-3 sm:px-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200 sm:flex">
+            <FiTerminal />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.75)]" />
+              <p className="truncate text-sm font-semibold text-slate-100">
+                Main workspace
+              </p>
+            </div>
+            <p className="mt-0.5 hidden text-xs text-slate-500 sm:block">
+              Changes sync with everyone in this room
+            </p>
+          </div>
         </div>
 
-        <button
-          className="px-3 py-1 bg-green-600 rounded hover:bg-green-700"
-          onClick={handleCodeRun}
-        >
-          Run ▶
-        </button>
+        <div className="flex items-center gap-2">
+          <label className="relative">
+            <span className="sr-only">Language</span>
+            <select
+              className="h-10 appearance-none rounded-xl border border-white/10 bg-slate-950/70 py-2 pl-3 pr-9 text-sm font-medium text-slate-200 outline-none transition hover:border-white/20 focus:border-cyan-300/50 focus:ring-2 focus:ring-cyan-300/10"
+              value={selectedLanguage}
+              onChange={handleLanguageChange}
+            >
+              {languages.map((lang) => (
+                <option key={lang.name} value={lang.name}>
+                  {lang.name}
+                </option>
+              ))}
+            </select>
+            <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          </label>
+
+          <button
+            className="inline-flex h-10 items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-300 to-blue-500 px-4 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-500/15 transition hover:-translate-y-0.5 hover:shadow-cyan-500/25 active:translate-y-0"
+            onClick={handleCodeRun}
+          >
+            <FiPlay className="fill-current" />
+            Run
+          </button>
+        </div>
       </div>
 
       {/* 🔹 Code Editor */}
-      <Editor
-        theme="vs-dark"
-        language={
-          languages.find((lang) => lang.name === selectedLanguage).monaco
-        }
-        value={code}
-        onChange={handleEditorChange}
-        onMount={(editor) => {
-          editorRef.current = editor;
-        }}
-      />
+      <div className="min-h-0 flex-1 overflow-hidden bg-[#1e1e1e]">
+        <Editor
+          height="100%"
+          width="100%"
+          theme="vs-dark"
+          language={
+            languages.find((lang) => lang.name === selectedLanguage).monaco
+          }
+          value={code}
+          onChange={handleEditorChange}
+          options={{
+            minimap: { enabled: false },
+            padding: { top: 16, bottom: 16 },
+            fontSize: 14,
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+          }}
+          onMount={(editor) => {
+            editorRef.current = editor;
+          }}
+        />
+      </div>
 
       {/* 🔹 Output + Input */}
-      <div className="flex h-[28vh] w-full border-t border-gray-700 mt-0.5">
+      <div className="grid h-[300px] shrink-0 border-t border-white/10 md:h-[240px] md:grid-cols-[minmax(0,1.65fr)_minmax(260px,1fr)]">
         {/* Output */}
-        <div className="w-[70%] bg-gray-950 text-green-400 p-4 overflow-auto border-r border-gray-700">
-          <h2 className="font-semibold text-white mb-3 text-sm border-b border-gray-800 pb-2">
-            Output:
-          </h2>
-          <pre className="font-mono text-sm">{output}</pre>
+        <div className="min-h-0 overflow-y-auto border-b border-white/10 bg-slate-950/80 p-4 text-emerald-300 md:border-b-0 md:border-r">
+          <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-3">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-100">
+              <FiTerminal className="text-emerald-300" />
+              Output
+            </h2>
+            <span className="rounded-md bg-white/5 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-slate-500">
+              Console
+            </span>
+          </div>
+          <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-6">
+            {output || (
+              <span className="text-slate-600">Run your code to see output…</span>
+            )}
+          </pre>
         </div>
 
         {/* Input */}
-        <div className="w-[30%] bg-gray-900 text-white p-4 flex flex-col">
-          <h2 className="font-semibold text-sm border-b border-gray-800 pb-2 mb-3">
-            Input:
+        <div className="flex min-h-0 flex-col overflow-hidden bg-slate-900/70 p-4 text-white">
+          <h2 className="mb-3 border-b border-white/10 pb-3 text-sm font-semibold text-slate-100">
+            Standard input
           </h2>
           <textarea
-            className="flex-1 bg-gray-800 p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-mono resize-none"
+            className="min-h-24 flex-1 resize-none rounded-xl border border-white/10 bg-slate-950/60 p-3 font-mono text-sm text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-cyan-300/40 focus:ring-2 focus:ring-cyan-300/10"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Enter input here..."
+            placeholder="Enter program input…"
           />
         </div>
       </div>
