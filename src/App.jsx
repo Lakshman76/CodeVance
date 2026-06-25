@@ -4,8 +4,9 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import AuthPage from "./pages/AuthPage";
 import Documentaions from "./pages/Documentaions";
-import Dashboard from "./components/Dashboard";
+import Dashboard from "./pages/Dashboard";
 import RequireAuth from "./auth/RequireAuth";
+import GuestOnly from "./auth/GuestOnly";
 
 function App() {
   const location = useLocation();
@@ -19,7 +20,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/docs" element={<Documentaions />} />
-        <Route path="/get-started" element={<AuthPage />} />
+        <Route
+          path="/get-started"
+          element={
+            <GuestOnly>
+              <AuthPage />
+            </GuestOnly>
+          }
+        />
         <Route
           path="/dashboard"
           element={
