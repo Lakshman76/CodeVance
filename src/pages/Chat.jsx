@@ -10,10 +10,8 @@ const Chat = ({ socket, roomId, username }) => {
   // ✅ Listen for incoming messages (room-safe)
   useEffect(() => {
     const handleMessage = (data) => {
-      // 🔒 ensure same room
       if (data.roomId !== roomId) return;
 
-      // ❗ ignore own message from server
       if (data.senderId === socket.id) return;
 
       setMessages((prev) => [...prev, data]);
@@ -42,10 +40,11 @@ const Chat = ({ socket, roomId, username }) => {
   }, [messages]);
 
   // ✅ Send message
-  function onSend() {
+  const onSend = () => {
     if (!message.trim()) return;
 
     const msgData = {
+      id: crypto.randomUUID(),
       roomId,
       text: message,
       sender: username,
@@ -58,7 +57,7 @@ const Chat = ({ socket, roomId, username }) => {
     socket.emit("chat-message", msgData);
 
     setMessage("");
-  }
+  };
 
   return (
     <div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden bg-slate-950/30">
@@ -91,12 +90,12 @@ const Chat = ({ socket, roomId, username }) => {
             </p>
           </div>
         )}
-        {messages.map((msg, i) => {
+        {messages.map((msg) => {
           const mine = msg.senderId === socket.id;
 
           return (
             <div
-              key={`${msg.senderId}-${i}`}
+              key={msg.id}
               className={`flex ${mine ? "justify-end" : "justify-start"}`}
             >
               <div
@@ -137,7 +136,10 @@ const Chat = ({ socket, roomId, username }) => {
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type a message..."
           onKeyDown={(e) => {
-            if (e.key === "Enter") onSend();
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              onSend();
+            }
           }}
         />
 
