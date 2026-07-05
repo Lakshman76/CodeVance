@@ -22,19 +22,20 @@ const Dashboard = () => {
   const [username, setUsername] = useState("");
   const [joined, setJoined] = useState(false);
   const [collaborationTab, setCollaborationTab] = useState("chat");
+  const [participants, setParticipants] = useState([]);
 
   // ✅ Save to localStorage only when valid
   useEffect(() => {
-  if (username) {
-    localStorage.setItem("username", username);
-  }
+    if (username) {
+      localStorage.setItem("username", username);
+    }
 
-  if (roomId) {
-    localStorage.setItem("roomId", roomId);
-  } else {
-    localStorage.removeItem("roomId");
-  }
-}, [username, roomId]);
+    if (roomId) {
+      localStorage.setItem("roomId", roomId);
+    } else {
+      localStorage.removeItem("roomId");
+    }
+  }, [username, roomId]);
 
   // ✅ Auto-join on refresh
   useEffect(() => {
@@ -52,6 +53,14 @@ const Dashboard = () => {
 
       setJoined(true);
     }
+  }, []);
+
+  useEffect(() => {
+    socket.on("participants", (users) => {
+      setParticipants(users);
+    });
+
+    return () => socket.off("participants");
   }, []);
 
   // ✅ Logout handler
@@ -141,6 +150,7 @@ const Dashboard = () => {
               username={username}
               collaborationTab={collaborationTab}
               setCollaborationTab={setCollaborationTab}
+              participants={participants}
             />
           </section>
         )}

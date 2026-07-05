@@ -1,11 +1,13 @@
 import { FiUsers, FiVideo, FiMonitor } from "react-icons/fi";
 import ChatPanel from "./ChatPanel";
+import ParticipantPanel from "./ParticipantsPanel";
 
 const CollaborationSidebar = ({
   socket,
   roomId,
   username,
   collaborationTab,
+  participants,
   setCollaborationTab,
 }) => {
   return (
@@ -15,9 +17,7 @@ const CollaborationSidebar = ({
           <p className="text-xs uppercase tracking-[0.24em] text-cyan-200/70">
             Collaboration
           </p>
-          <h2 className="text-lg font-semibold text-white">
-            Room activity
-          </h2>
+          <h2 className="text-lg font-semibold text-white">Room activity</h2>
         </div>
 
         <span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs font-medium text-emerald-200">
@@ -44,41 +44,11 @@ const CollaborationSidebar = ({
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
         {/* Participants */}
-        <div
-          className={`shrink-0 rounded-2xl border border-white/10 bg-slate-950/40 p-4 ${
-            collaborationTab === "people"
-              ? "md:block"
-              : "md:hidden min-[1400px]:block"
-          }`}
-        >
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
-              <FiUsers className="text-cyan-200" />
-              Participants
-            </h3>
-
-            <span className="text-xs text-slate-500">Soon</span>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-300/15 text-sm font-bold text-cyan-100">
-                {(username || "U").charAt(0).toUpperCase()}
-              </div>
-
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-slate-100">
-                  {username}
-                </p>
-                <p className="text-xs text-emerald-300">You</p>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.03] p-3 text-sm text-slate-500">
-              Participant list will appear here.
-            </div>
-          </div>
-        </div>
+        <ParticipantPanel
+          username={username}
+          participants={participants}
+          collaborationTab={collaborationTab}
+        />
 
         {/* Video Call */}
         <div
@@ -120,11 +90,7 @@ const CollaborationSidebar = ({
               : "flex md:hidden min-[1400px]:flex"
           }`}
         >
-          <ChatPanel
-            socket={socket}
-            roomId={roomId}
-            username={username}
-          />
+          <ChatPanel socket={socket} roomId={roomId} username={username} />
         </div>
       </div>
     </aside>
