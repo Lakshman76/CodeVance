@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { MdOutlineArrowRightAlt } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   // Abstract shape components with movement
@@ -167,8 +168,8 @@ const HeroSection = () => {
         backgroundSize: "cover",
         backgroundRepeat: "repeat",
         backgroundAttachment: "fixed",
-      }}>
-      
+      }}
+    >
       {/* Moving shapes */}
       {shapes.map((shape, index) => (
         <MovingShape
@@ -197,7 +198,8 @@ const HeroSection = () => {
           className="text-3xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-5xl text-white mb-4 sm:mb-6 leading-[1.1] md:leading-[1.2] tracking-wide hover:text-transparent hover:[-webkit-text-stroke:2px_grey] hover:[text-stroke:2px_grey] transition-colors duration-300 hover:cursor-none font-ZenDots"
           style={{
             textWrap: "balance",
-          }}>
+          }}
+        >
           Efficient C<span className="mx-0.5 text-[#626F47]">o</span>llab
           <span className="mx-0.5 text-[#626F47]">o</span>rati
           <span className="mx-0.5 text-[#626F47]">o</span>n f
@@ -211,7 +213,8 @@ const HeroSection = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.5, delay: 0.6 }}
-          className="text-base sm:text-xl md:text-2xl text-gray-400 mb-8 sm:mb-12 max-w-2xl md:max-w-3xl mx-auto mt-4 sm:mt-8 font-poppins px-2 sm:px-0">
+          className="text-base sm:text-xl md:text-2xl text-gray-400 mb-8 sm:mb-12 max-w-2xl md:max-w-3xl mx-auto mt-4 sm:mt-8 font-poppins px-2 sm:px-0"
+        >
           C<span className="mx-0.5 text-[#626F47] font-ZenDots">o</span>de •
           Think • Share • Speak • Debug — T
           <span className="mx-0.5 text-[#626F47] font-ZenDots">o</span>gether.
@@ -221,13 +224,21 @@ const HeroSection = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.5, delay: 1.2 }}
-          className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
-          <button className="px-6 sm:px-8 py-2.5 sm:py-3.5 bg-white text-black hover:bg-cyan-900 hover:text-white rounded-full text-sm sm:text-base md:text-lg font-medium transition-all duration-300 active:scale-95 cursor-pointer w-full sm:w-auto max-w-xs sm:max-w-none">
+          className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center"
+        >
+          <Link
+            to="/get-started"
+            className="px-6 sm:px-8 py-2.5 sm:py-3.5 bg-white text-black hover:bg-cyan-900 hover:text-white rounded-full text-sm sm:text-base md:text-lg font-medium transition-all duration-300 active:scale-95 w-full sm:w-auto max-w-xs sm:max-w-none text-center"
+          >
             Get Started
-          </button>
-          <button className="px-6 sm:px-8 py-2.5 sm:py-3.5 text-white bg-white/10 rounded-full text-sm sm:text-base md:text-lg font-medium transition-all duration-300 active:scale-95 border border-white/20 cursor-pointer flex items-center justify-center gap-2 w-full sm:w-auto max-w-xs sm:max-w-none">
-            Read More <MdOutlineArrowRightAlt className="text-lg" />
-          </button>
+          </Link>
+          <Link
+            to="/docs"
+            className="px-6 sm:px-8 py-2.5 sm:py-3.5 text-white bg-white/10 rounded-full text-sm sm:text-base md:text-lg font-medium transition-all duration-300 active:scale-95 border border-white/20 flex items-center justify-center gap-2 w-full sm:w-auto max-w-xs sm:max-w-none"
+          >
+            Read More
+            <MdOutlineArrowRightAlt className="text-lg" />
+          </Link>
         </motion.div>
       </div>
 
@@ -236,7 +247,8 @@ const HeroSection = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.5, delay: 2.4 }}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10"
+      >
         <div className="w-5 h-8 sm:w-6 sm:h-10 border-2 sm:border-3 border-white/40 rounded-full flex justify-center">
           <motion.div
             animate={{
