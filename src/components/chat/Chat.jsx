@@ -39,6 +39,38 @@ const Chat = ({ socket, roomId, username }) => {
     }
   }, [messages]);
 
+  useEffect(() => {
+    const handleUserJoined = (data) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          type: "system",
+          text: data.message,
+        },
+      ]);
+    };
+
+    const handleUserLeft = (data) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          type: "system",
+          text: data.message,
+        },
+      ]);
+    };
+
+    socket.on("user_joined", handleUserJoined);
+    socket.on("user_left", handleUserLeft);
+
+    return () => {
+      socket.off("user_joined", handleUserJoined);
+      socket.off("user_left", handleUserLeft);
+    };
+  }, [socket]);
+
   // ✅ Send message
   const onSend = () => {
     if (!message.trim()) return;
@@ -91,6 +123,16 @@ const Chat = ({ socket, roomId, username }) => {
           </div>
         )}
         {messages.map((msg) => {
+          
+          if (msg.type === "system") {
+            return (
+              <div key={msg.id} className="flex justify-center">
+                <div className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-400">
+                  {msg.text}
+                </div>
+              </div>
+            );
+          }
           const mine = msg.senderId === socket.id;
 
           return (
