@@ -6,6 +6,8 @@ import {
   FiMonitor,
   FiVideo,
 } from "react-icons/fi";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const DashboardHeader = ({
   roomId,
@@ -14,24 +16,33 @@ const DashboardHeader = ({
   onLogout,
   onLeaveRoom,
 }) => {
+  const itemVariants = {
+    hidden: { y: -20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 10,
+      },
+    },
+  };
   return (
     <nav className="z-30 shrink-0 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 shadow-2xl shadow-cyan-950/30 backdrop-blur-2xl">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <div className="min-h-14 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/30 bg-cyan-300/10 text-cyan-200 shadow-lg shadow-cyan-500/10">
-              <FiCode className="text-xl" />
-            </div>
-
-            <div className="min-w-0">
-              <h1 className="font-ZenDots text-lg tracking-wide text-white sm:text-xl">
-                CodeVance
-              </h1>
-              <p className="truncate text-xs text-slate-400">
-                Collaborative developer workspace
-              </p>
-            </div>
-          </div>
+          <motion.div variants={itemVariants}>
+            <Link to="/" className="z-50">
+              <motion.h1 className="text-xl sm:text-2xl md:text-3xl lg:text-5xl text-[#F4E7E1] font-thin font-ZenDots">
+                C
+                <span className="mx-0.5 sm:mx-1 font-thin text-[#626F47]">
+                  o
+                </span>
+                deVance
+              </motion.h1>
+            </Link>
+          </motion.div>
 
           {/* Mobile Button */}
           <button
@@ -96,7 +107,7 @@ const DashboardHeader = ({
 
           {/* Action Button */}
           <button
-            className="hidden items-center gap-2 rounded-xl border border-rose-300/20 bg-rose-400/10 px-4 py-2 text-sm font-semibold text-rose-100 transition hover:border-rose-300/40 hover:bg-rose-400/20 xl:inline-flex"
+            className="hidden items-center gap-4 rounded-xl border border-rose-300/20 bg-rose-400/10 px-4 py-2 text-sm font-semibold text-rose-100 transition hover:border-rose-300/40 hover:bg-rose-400/20 xl:inline-flex"
             onClick={joined ? onLeaveRoom : onLogout}
           >
             <FiLogOut />
