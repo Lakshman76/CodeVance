@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import axiosInstance from "../config/axiosInstance";
+import LoadingScreen from "../components/LoadingScreen";
 
 const RequireAuth = ({ children }) => {
   const [loading, setLoading] = useState(true);
@@ -20,7 +21,7 @@ const RequireAuth = ({ children }) => {
       });
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <LoadingScreen />;
 
   return authenticated ? children : <Navigate to="/get-started" replace />;
 };
