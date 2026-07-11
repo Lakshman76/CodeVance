@@ -59,7 +59,7 @@ const CodeEditor = ({ socket, roomId }) => {
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0].name);
   const [output, setOutput] = useState("");
   const [input, setInput] = useState("");
-
+  const [isRunning, setIsRunning] = useState(false);
   useCodeSync({
     socket,
     roomId,
@@ -91,7 +91,9 @@ const CodeEditor = ({ socket, roomId }) => {
 
   // ✅ Run code safely
   const handleCodeRun = async () => {
+    if (isRunning) return;
     try {
+      setIsRunning(true);
       const encodedCode = btoa(code);
 
       const langObj = languages.find((lang) => lang.name === selectedLanguage);
@@ -111,6 +113,8 @@ const CodeEditor = ({ socket, roomId }) => {
       else setOutput("No output");
     } catch (err) {
       setOutput(err.response?.data?.error || err.message);
+    } finally {
+      setIsRunning(false);
     }
   };
 
@@ -122,6 +126,7 @@ const CodeEditor = ({ socket, roomId }) => {
         selectedLanguage={selectedLanguage}
         onLanguageChange={handleLanguageChange}
         onRunCode={handleCodeRun}
+        isRunning={isRunning}
       />
 
       {/* 🔹 Code Editor */}
