@@ -3,6 +3,7 @@ import {
   FiCopy,
   FiLogOut,
   FiMic,
+  FiMicOff,
   FiMonitor,
   FiVideo,
 } from "react-icons/fi";
@@ -15,6 +16,8 @@ const DashboardHeader = ({
   joined,
   onLogout,
   onLeaveRoom,
+  isMuted,
+  onToggleMic,
 }) => {
   const itemVariants = {
     hidden: { y: -20, opacity: 0 },
@@ -92,14 +95,21 @@ const DashboardHeader = ({
                   Video
                 </button>
 
-                <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm text-slate-200 transition hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-white">
-                  <FiMic />
-                  Audio
-                </button>
+                <button
+                  onClick={onToggleMic}
+                  className={`inline-flex h-11 w-[120px] items-center justify-center gap-2 rounded-xl border transition-all duration-300 ${
+                    isMuted
+                      ? "border-rose-400/30 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20"
+                      : "border-emerald-400/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
+                  }`}
+                >
+                  {isMuted ? (
+                    <FiMicOff size={18} strokeWidth={2.3} />
+                  ) : (
+                    <FiMic size={18} strokeWidth={2.3} />
+                  )}
 
-                <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm text-slate-200 transition hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-white">
-                  <FiMonitor />
-                  Share
+                  <span>{isMuted ? "Mic Off" : "Mic On"}</span>
                 </button>
               </div>
             </>

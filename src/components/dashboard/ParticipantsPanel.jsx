@@ -1,4 +1,4 @@
-import { FiUsers } from "react-icons/fi";
+import { FiUsers, FiMic, FiMicOff } from "react-icons/fi";
 
 const ParticipantPanel = ({ username, participants, collaborationTab }) => {
   const avatarColors = [
@@ -70,8 +70,19 @@ const ParticipantPanel = ({ username, participants, collaborationTab }) => {
 
                     {isYou && <p className="text-xs text-emerald-300">You</p>}
                   </div>
-
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                  <div
+                    className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
+                      user.isMuted
+                        ? "bg-rose-500/10 text-rose-300"
+                        : "bg-emerald-500/10 text-emerald-300"
+                    }`}
+                  >
+                    {user.isMuted ? (
+                      <FiMicOff size={16} />
+                    ) : (
+                      <FiMic size={16} />
+                    )}
+                  </div>
                 </div>
               );
             })

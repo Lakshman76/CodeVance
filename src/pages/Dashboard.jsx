@@ -4,6 +4,7 @@ import axiosInstance from "../config/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import CodeEditor from "./CodeEditor";
 import { io } from "socket.io-client";
+import useAudioCall from "../hooks/useAudioCall";
 
 import JoinRoomCard from "../components/dashboard/JoinRoomCard";
 import CollaborationSidebar from "../components/dashboard/CollaborationSidebar";
@@ -23,6 +24,18 @@ const Dashboard = () => {
   const [joined, setJoined] = useState(false);
   const [collaborationTab, setCollaborationTab] = useState("chat");
   const [participants, setParticipants] = useState([]);
+  const [isMuted, setIsMuted] = useState(true);
+
+  const {
+    localStream,
+    stopMicrophone,
+    unmuteMicrophone,
+    createOffer,
+    handleOffer,
+    handleAnswer,
+    handleIceCandidate,
+    addAudioTrackToPeers,
+  } = useAudioCall();
 
   // ✅ Save to localStorage only when valid
   useEffect(() => {
@@ -63,6 +76,58 @@ const Dashboard = () => {
     return () => socket.off("participants");
   }, []);
 
+  useEffect(() => {
+    if (!joined) return;
+
+    socket.emit("toggle-mic", {
+      isMuted,
+    });
+  }, [isMuted, joined]);
+
+  useEffect(() => {
+    socket.on("new-peer", ({ socketId }) => {
+      console.log("🆕 New Peer:", socketId);
+
+      createOffer(socket, socketId);
+    });
+
+    return () => {
+      socket.off("new-peer");
+    };
+  }, [createOffer]);
+
+  useEffect(() => {
+    socket.on("offer", ({ sender, offer }) => {
+      console.log("📥 Offer received");
+
+      handleOffer(socket, sender, offer);
+    });
+
+    return () => {
+      socket.off("offer");
+    };
+  }, [handleOffer]);
+
+  useEffect(() => {
+    socket.on("answer", ({ sender, answer }) => {
+      console.log("📥 Answer received");
+
+      handleAnswer(sender, answer);
+    });
+
+    return () => {
+      socket.off("answer");
+    };
+  }, [handleAnswer]);
+
+  useEffect(() => {
+    socket.on("ice-candidate", ({ sender, candidate }) => {
+      handleIceCandidate(sender, candidate);
+    });
+
+    return () => socket.off("ice-candidate");
+  }, [handleIceCandidate]);
+
   // ✅ Logout handler
   function onLogout(e) {
     e.preventDefault();
@@ -85,6 +150,7 @@ const Dashboard = () => {
   }
   // ✅ Leave room
   function handleLeaveRoom() {
+    stopMicrophone();
     socket.emit("leave_room", {
       roomId,
       username,
@@ -112,6 +178,30 @@ const Dashboard = () => {
     setJoined(true);
   }
 
+  const handleToggleMic = async () => {
+    try {
+      if (isMuted) {
+        // First time → asks for permission.
+        // Later → simply enables the existing track.
+        const wasEmpty = !localStream.current;
+
+        await unmuteMicrophone();
+
+        // Only add tracks once.
+        if (wasEmpty) {
+          addAudioTrackToPeers();
+        }
+      } else {
+        stopMicrophone();
+      }
+
+      setIsMuted((prev) => !prev);
+    } catch (err) {
+      toast.error("Microphone permission denied");
+      console.log(err);
+    }
+  };
+
   return (
     <main className="relative h-screen overflow-hidden bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#111827] text-white">
       <div className="pointer-events-none fixed inset-0 opacity-50 [background-image:linear-gradient(to_right,rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.08)_1px,transparent_1px)] [background-size:76px_76px]" />
@@ -124,8 +214,11 @@ const Dashboard = () => {
           roomId={roomId}
           username={username}
           joined={joined}
+          isMuted={isMuted}
+          setIsMuted={setIsMuted}
           onLogout={onLogout}
           onLeaveRoom={handleLeaveRoom}
+          onToggleMic={handleToggleMic}
         />
         {!joined ? (
           // 🔹 Join Room UI
@@ -151,6 +244,7 @@ const Dashboard = () => {
               collaborationTab={collaborationTab}
               setCollaborationTab={setCollaborationTab}
               participants={participants}
+              isMuted={isMuted}
             />
           </section>
         )}

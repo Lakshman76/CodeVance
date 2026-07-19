@@ -9,6 +9,7 @@ const CollaborationSidebar = ({
   collaborationTab,
   participants,
   setCollaborationTab,
+  isMuted,
 }) => {
   return (
     <aside className="flex min-h-[560px] min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/10 p-3 shadow-2xl shadow-cyan-950/20 backdrop-blur-2xl min-[1400px]:h-full min-[1400px]:min-h-0">
@@ -26,8 +27,8 @@ const CollaborationSidebar = ({
       </div>
 
       {/* Mobile Tabs */}
-      <div className="mb-3 hidden shrink-0 grid-cols-3 gap-2 md:grid min-[1400px]:hidden">
-        {["people", "call", "chat"].map((tab) => (
+      <div className="mb-3 hidden shrink-0 grid-cols-2 gap-2 md:grid min-[1400px]:hidden">
+        {["people", "chat"].map((tab) => (
           <button
             key={tab}
             onClick={() => setCollaborationTab(tab)}
@@ -48,39 +49,8 @@ const CollaborationSidebar = ({
           username={username}
           participants={participants}
           collaborationTab={collaborationTab}
+          isMuted={isMuted}
         />
-
-        {/* Video Call */}
-        <div
-          className={`shrink-0 rounded-2xl border border-white/10 bg-slate-950/40 p-4 ${
-            collaborationTab === "call"
-              ? "md:block"
-              : "md:hidden min-[1400px]:block"
-          }`}
-        >
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
-              <FiVideo className="text-cyan-200" />
-              Video call
-            </h3>
-
-            <span className="text-xs text-slate-500">Soon</span>
-          </div>
-
-          <div className="flex aspect-video items-center justify-center rounded-xl border border-dashed border-cyan-200/20 bg-gradient-to-br from-cyan-300/10 via-slate-950/60 to-blue-500/10 text-center">
-            <div>
-              <FiMonitor className="mx-auto mb-2 text-2xl text-cyan-100" />
-
-              <p className="text-sm font-medium text-slate-300">
-                Calls and screen sharing
-              </p>
-
-              <p className="text-xs text-slate-500">
-                Reserved for the next collaboration layer
-              </p>
-            </div>
-          </div>
-        </div>
 
         {/* Chat */}
         <div
