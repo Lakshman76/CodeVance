@@ -58,6 +58,22 @@ const unmuteMicrophone = async () => {
 
     const peer = new RTCPeerConnection(rtcConfig);
 
+    peer.onnegotiationneeded = async () => {
+      try {
+        const offer = await peer.createOffer();
+        await peer.setLocalDescription(offer);
+
+        socket.emit("offer", {
+          target: remoteSocketId,
+          offer,
+        });
+
+        console.log("🔄 Renegotiation offer sent");
+      } catch (err) {
+        console.error("Renegotiation failed:", err);
+      }
+    };
+
     // Send ICE candidates to the remote peer
     peer.onicecandidate = (event) => {
       if (event.candidate) {

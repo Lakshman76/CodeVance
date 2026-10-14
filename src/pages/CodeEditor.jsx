@@ -1,12 +1,13 @@
 import { useState } from "react";
-import Editor from "@monaco-editor/react";
 import axiosInstance from "../config/axiosInstance";
-import { FiChevronDown, FiPlay, FiTerminal } from "react-icons/fi";
 import EditorToolbar from "../components/editors/EditorToolbar";
 import MonacoEditor from "../components/editors/MonacoEditor";
 import OutputPanel from "../components/editors/OutputPanel";
 import InputPanel from "../components/editors/InputPanel";
+import Whiteboard from "../components/editors/Whiteboard";
 import useCodeSync from "../hooks/useCodeSync";
+import useWhiteboardSync from "../hooks/useWhiteboardSync";
+import useViewSync from "../hooks/useViewSync";
 
 const languages = [
   {
@@ -54,18 +55,34 @@ int main() {
   },
 ];
 
-const CodeEditor = ({ socket, roomId }) => {
+const CodeEditor = ({ socket, roomId, username }) => {
   const [code, setCode] = useState(languages[0].code);
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0].name);
   const [output, setOutput] = useState("");
   const [input, setInput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
+  const [view, setView] = useState("code");
+  const [excalidrawAPI, setExcalidrawAPI] = useState(null);
   useCodeSync({
     socket,
     roomId,
     code,
     setCode,
+    selectedLanguage,
+    setSelectedLanguage,
   });
+  const { onChange: onWhiteboardChange, onPointerUpdate } = useWhiteboardSync({
+    socket,
+    roomId,
+    username,
+    excalidrawAPI,
+  });
+  useViewSync({ socket, roomId, view, setView });
+
+  const handleViewChange = (nextView) => {
+    setView(nextView);
+    socket.emit("view-change", { view: nextView });
+  };
 
   // ✅ Emit code changes
   const handleEditorChange = (value) => {
@@ -79,13 +96,14 @@ const CodeEditor = ({ socket, roomId }) => {
   // ✅ Handle language change + sync
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
-    setSelectedLanguage(newLang);
-
     const newCode = languages.find((lang) => lang.name === newLang).code;
+
+    setSelectedLanguage(newLang);
     setCode(newCode);
 
-    socket.emit("code-change", {
-      code: e.target.value,
+    socket.emit("language-change", {
+      language: newLang,
+      code: newCode,
     });
   };
 
@@ -127,21 +145,36 @@ const CodeEditor = ({ socket, roomId }) => {
         onLanguageChange={handleLanguageChange}
         onRunCode={handleCodeRun}
         isRunning={isRunning}
+        view={view}
+        onViewChange={handleViewChange}
       />
 
-      {/* 🔹 Code Editor */}
-      <MonacoEditor
-        languages={languages}
-        selectedLanguage={selectedLanguage}
-        code={code}
-        onCodeChange={handleEditorChange}
-      />
-
-      {/* 🔹 Output + Input */}
-      <div className="grid h-[300px] shrink-0 border-t border-white/10 md:h-[240px] md:grid-cols-[minmax(0,1.65fr)_minmax(260px,1fr)]">
-        <OutputPanel output={output} />
-
-        <InputPanel input={input} setInput={setInput} />
+      <div className="relative min-h-0 flex-1">
+        <div
+          className={`absolute inset-0 flex min-h-0 flex-col transition-all duration-200 ${view === "code" ? "visible opacity-100" : "invisible pointer-events-none opacity-0"}`}
+          aria-hidden={view !== "code"}
+        >
+          <MonacoEditor
+            languages={languages}
+            selectedLanguage={selectedLanguage}
+            code={code}
+            onCodeChange={handleEditorChange}
+          />
+          <div className="grid h-[300px] shrink-0 border-t border-white/10 md:h-[240px] md:grid-cols-[minmax(0,1.65fr)_minmax(260px,1fr)]">
+            <OutputPanel output={output} />
+            <InputPanel input={input} setInput={setInput} />
+          </div>
+        </div>
+        <div
+          className={`absolute inset-0 transition-all duration-200 ${view === "whiteboard" ? "visible opacity-100" : "invisible pointer-events-none opacity-0"}`}
+          aria-hidden={view !== "whiteboard"}
+        >
+          <Whiteboard
+            setExcalidrawAPI={setExcalidrawAPI}
+            onChange={onWhiteboardChange}
+            onPointerUpdate={onPointerUpdate}
+          />
+        </div>
       </div>
     </div>
   );

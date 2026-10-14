@@ -45,8 +45,6 @@ const Dashboard = () => {
 
     if (roomId) {
       localStorage.setItem("roomId", roomId);
-    } else {
-      localStorage.removeItem("roomId");
     }
   }, [username, roomId]);
 
@@ -69,11 +67,12 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    socket.on("participants", (users) => {
+    const handleParticipants = (users) => {
       setParticipants(users);
-    });
+    };
+    socket.on("participants", handleParticipants);
 
-    return () => socket.off("participants");
+    return () => socket.off("participants", handleParticipants);
   }, []);
 
   useEffect(() => {
@@ -233,7 +232,7 @@ const Dashboard = () => {
           // 🔹 Main App (Editor + Chat)
           <section className="grid min-h-0 flex-1 gap-4 overflow-y-auto py-4 min-[1400px]:h-full min-[1400px]:grid-cols-[minmax(0,1fr)_420px] min-[1400px]:overflow-hidden">
             <div className="min-h-[700px] min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-white/10 p-2 shadow-2xl shadow-cyan-950/20 backdrop-blur-2xl sm:p-3 min-[1400px]:min-h-0">
-              <CodeEditor socket={socket} roomId={roomId} />
+              <CodeEditor socket={socket} roomId={roomId} username={username} />
             </div>
 
             {/* aside */}

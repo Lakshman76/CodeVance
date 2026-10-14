@@ -1,4 +1,4 @@
-import { FiChevronDown, FiPlay, FiTerminal } from "react-icons/fi";
+import { FiChevronDown, FiCode, FiPlay, FiTerminal, FiPenTool } from "react-icons/fi";
 
 const EditorToolbar = ({
   languages,
@@ -6,6 +6,8 @@ const EditorToolbar = ({
   onLanguageChange,
   onRunCode,
   isRunning,
+  view,
+  onViewChange,
 }) => {
   return (
     <div className="relative flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-white/[0.04] px-3 py-3 sm:px-4">
@@ -38,7 +40,9 @@ const EditorToolbar = ({
           </div>
 
           <p className="mt-0.5 hidden text-xs text-slate-500 sm:block">
-            {isRunning
+            {view === "whiteboard"
+              ? "Whiteboard is shared with everyone in this room"
+              : isRunning
               ? "Executing your program..."
               : "Changes sync with everyone in this room"}
           </p>
@@ -47,6 +51,11 @@ const EditorToolbar = ({
 
       {/* Right Side */}
       <div className="flex items-center gap-2">
+        <div className="inline-flex rounded-xl border border-white/10 bg-slate-950/70 p-1" role="group" aria-label="Workspace view">
+          <button type="button" onClick={() => onViewChange("code")} aria-pressed={view === "code"} className={`inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition ${view === "code" ? "bg-cyan-300/15 text-cyan-200" : "text-slate-400 hover:text-slate-200"}`}><FiCode /> Code</button>
+          <button type="button" onClick={() => onViewChange("whiteboard")} aria-pressed={view === "whiteboard"} className={`inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition ${view === "whiteboard" ? "bg-cyan-300/15 text-cyan-200" : "text-slate-400 hover:text-slate-200"}`}><FiPenTool /> Whiteboard</button>
+        </div>
+        {view === "code" && <>
         <label className="relative">
           <span className="sr-only">Language</span>
 
@@ -110,6 +119,7 @@ const EditorToolbar = ({
             </>
           )}
         </button>
+        </>}
       </div>
     </div>
   );

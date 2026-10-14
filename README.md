@@ -180,7 +180,6 @@ CodeVance (Current)
 ## 🚧 Upcoming Features
 
 - 📹 Video Calling
-- 🎤 Audio Calling
 - 🖥️ Screen Sharing
 - 👥 Active Participants Panel
 - 📁 Collaborative File Explorer
