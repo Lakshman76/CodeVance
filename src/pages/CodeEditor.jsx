@@ -5,7 +5,7 @@ import MonacoEditor from "../components/editors/MonacoEditor";
 import OutputPanel from "../components/editors/OutputPanel";
 import InputPanel from "../components/editors/InputPanel";
 import Whiteboard from "../components/editors/Whiteboard";
-import useCodeSync from "../hooks/useCodeSync";
+import useYjsSync from "../hooks/useYjsSync";
 import useWhiteboardSync from "../hooks/useWhiteboardSync";
 import useViewSync from "../hooks/useViewSync";
 
@@ -56,21 +56,12 @@ int main() {
 ];
 
 const CodeEditor = ({ socket, roomId, username }) => {
-  const [code, setCode] = useState(languages[0].code);
-  const [selectedLanguage, setSelectedLanguage] = useState(languages[0].name);
   const [output, setOutput] = useState("");
   const [input, setInput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const [view, setView] = useState("code");
   const [excalidrawAPI, setExcalidrawAPI] = useState(null);
-  useCodeSync({
-    socket,
-    roomId,
-    code,
-    setCode,
-    selectedLanguage,
-    setSelectedLanguage,
-  });
+  const { ytext, awareness, language: selectedLanguage, setLanguage, getCode, ready } = useYjsSync({ socket, roomId, username });
   const { onChange: onWhiteboardChange, onPointerUpdate } = useWhiteboardSync({
     socket,
     roomId,
@@ -84,27 +75,11 @@ const CodeEditor = ({ socket, roomId, username }) => {
     socket.emit("view-change", { view: nextView });
   };
 
-  // ✅ Emit code changes
-  const handleEditorChange = (value) => {
-    setCode(value);
-
-    socket.emit("code-change", {
-      code: value,
-    });
-  };
-
-  // ✅ Handle language change + sync
+  // Update the shared language and starter code in one Yjs transaction.
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
-    const newCode = languages.find((lang) => lang.name === newLang).code;
-
-    setSelectedLanguage(newLang);
-    setCode(newCode);
-
-    socket.emit("language-change", {
-      language: newLang,
-      code: newCode,
-    });
+    const language = languages.find((lang) => lang.name === newLang);
+    if (language) setLanguage(language.name, language.code);
   };
 
   // ✅ Run code safely
@@ -112,7 +87,7 @@ const CodeEditor = ({ socket, roomId, username }) => {
     if (isRunning) return;
     try {
       setIsRunning(true);
-      const encodedCode = btoa(code);
+      const encodedCode = btoa(getCode());
 
       const langObj = languages.find((lang) => lang.name === selectedLanguage);
 
@@ -157,8 +132,9 @@ const CodeEditor = ({ socket, roomId, username }) => {
           <MonacoEditor
             languages={languages}
             selectedLanguage={selectedLanguage}
-            code={code}
-            onCodeChange={handleEditorChange}
+            ytext={ytext}
+            awareness={awareness}
+            ready={ready}
           />
           <div className="grid h-[300px] shrink-0 border-t border-white/10 md:h-[240px] md:grid-cols-[minmax(0,1.65fr)_minmax(260px,1fr)]">
             <OutputPanel output={output} />

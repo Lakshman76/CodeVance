@@ -15,8 +15,6 @@ const useAudioCall = () => {
 
       localStream.current = stream;
 
-      console.log("🎤 Microphone ready");
-
       return stream;
     } catch (err) {
       console.error(err);
@@ -31,8 +29,6 @@ const useAudioCall = () => {
   localStream.current
     .getAudioTracks()
     .forEach((track) => (track.enabled = false));
-
-  console.log("🔇 Microphone muted");
 };
 
 const unmuteMicrophone = async () => {
@@ -44,8 +40,6 @@ const unmuteMicrophone = async () => {
   localStream.current
     .getAudioTracks()
     .forEach((track) => (track.enabled = true));
-
-  console.log("🎤 Microphone unmuted");
 
   return localStream.current;
 };
