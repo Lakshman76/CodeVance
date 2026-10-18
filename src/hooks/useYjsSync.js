@@ -1,22 +1,38 @@
 import { useEffect, useMemo, useState } from "react";
 import * as Y from "yjs";
-import { Awareness, applyAwarenessUpdate, encodeAwarenessUpdate, removeAwarenessStates } from "y-protocols/awareness";
+import {
+  Awareness,
+  applyAwarenessUpdate,
+  encodeAwarenessUpdate,
+  removeAwarenessStates,
+} from "y-protocols/awareness";
 import colorForSocket from "../utils/userColor";
 
 const DEFAULT_CODE = 'console.log("Hello World");';
+const toBytes = (data) => {
+  if (data instanceof Uint8Array) return data;
+  if (data instanceof ArrayBuffer) return new Uint8Array(data);
+  return null;
+};
 const useYjsSync = ({ socket, roomId, username }) => {
   const doc = useMemo(() => new Y.Doc(), [roomId]);
   const ytext = useMemo(() => doc.getText("code"), [doc]);
   const meta = useMemo(() => doc.getMap("meta"), [doc]);
   const awareness = useMemo(() => new Awareness(doc), [doc]);
-  const [language, setLanguageState] = useState(meta.get("language") || "JavaScript");
+  const [language, setLanguageState] = useState(
+    meta.get("language") || "JavaScript",
+  );
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     setLanguageState(meta.get("language") || "JavaScript");
     setReady(false);
     const color = colorForSocket(socket.id);
-    awareness.setLocalStateField("user", { name: username || "Collaborator", color: color.color, colorLight: color.colorLight });
+    awareness.setLocalStateField("user", {
+      name: username || "Collaborator",
+      color: color.color,
+      colorLight: color.colorLight,
+    });
     awareness.setLocalStateField("socketId", socket.id);
 
     let receivedSync = false;
@@ -26,29 +42,51 @@ const useYjsSync = ({ socket, roomId, username }) => {
     const handleAwarenessUpdate = ({ added, updated, removed }, origin) => {
       if (origin !== "remote") {
         const changed = [...added, ...updated, ...removed];
-        if (changed.length) socket.emit("yjs-awareness", { update: encodeAwarenessUpdate(awareness, changed) });
+        if (changed.length)
+          socket.emit("yjs-awareness", {
+            update: encodeAwarenessUpdate(awareness, changed),
+          });
       }
     };
     const handleUpdate = ({ roomId: incomingRoom, update } = {}) => {
-      if (incomingRoom !== roomId || !(update instanceof Uint8Array)) return;
-      Y.applyUpdate(doc, update, "remote");
+      const bytes = toBytes(update);
+      if (incomingRoom !== roomId || !bytes) return;
+      Y.applyUpdate(doc, bytes, "remote");
       receivedSync = true;
       setReady(true);
     };
+
     const handleAwareness = ({ roomId: incomingRoom, update } = {}) => {
-      if (incomingRoom !== roomId || !(update instanceof Uint8Array)) return;
-      applyAwarenessUpdate(awareness, update, "remote");
+      const bytes = toBytes(update);
+      if (incomingRoom !== roomId || !bytes) return;
+      applyAwarenessUpdate(awareness, bytes, "remote");
     };
     const handleRequestSync = ({ targetSocketId } = {}) => {
       if (!targetSocketId) return;
-      socket.emit("yjs-send-sync", { targetSocketId, update: Y.encodeStateAsUpdate(doc) });
-      socket.emit("yjs-awareness", { update: encodeAwarenessUpdate(awareness, [awareness.clientID]) });
+      socket.emit("yjs-send-sync", {
+        targetSocketId,
+        update: Y.encodeStateAsUpdate(doc),
+      });
+      socket.emit("yjs-awareness", {
+        update: encodeAwarenessUpdate(awareness, [awareness.clientID]),
+      });
     };
     const handleParticipants = (participants = []) => {
-      const ids = new Set(participants.map((peer) => typeof peer === "string" ? peer : peer.socketId ?? peer.id).filter(Boolean));
+      const ids = new Set(
+        participants
+          .map((peer) =>
+            typeof peer === "string" ? peer : (peer.socketId ?? peer.id),
+          )
+          .filter(Boolean),
+      );
       const stale = [];
       awareness.getStates().forEach((state, clientID) => {
-        if (clientID !== awareness.clientID && state.socketId && !ids.has(state.socketId)) stale.push(clientID);
+        if (
+          clientID !== awareness.clientID &&
+          state.socketId &&
+          !ids.has(state.socketId)
+        )
+          stale.push(clientID);
       });
       if (stale.length) removeAwarenessStates(awareness, stale, "remote");
     };
@@ -72,7 +110,8 @@ const useYjsSync = ({ socket, roomId, username }) => {
         setReady(true);
       }
     }, 600);
-    const observeLanguage = () => setLanguageState(meta.get("language") || "JavaScript");
+    const observeLanguage = () =>
+      setLanguageState(meta.get("language") || "JavaScript");
     meta.observe(observeLanguage);
 
     return () => {
@@ -99,7 +138,14 @@ const useYjsSync = ({ socket, roomId, username }) => {
     });
   };
 
-  return { ytext, awareness, language, setLanguage, getCode: () => ytext.toString(), ready };
+  return {
+    ytext,
+    awareness,
+    language,
+    setLanguage,
+    getCode: () => ytext.toString(),
+    ready,
+  };
 };
 
 export default useYjsSync;
